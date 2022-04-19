@@ -1,5 +1,5 @@
 #from os import fork
-from brownie import accounts, network , config, MockV3Aggregator,Contract,VRFCoordinatorMock
+from brownie import accounts, network , config, MockV3Aggregator,Contract,VRFCoordinatorMock,LinkToken
 from web3 import Web3
 
 DECIMALS = 8
@@ -24,19 +24,20 @@ def getAccount(index=None, id=None):
     print("getting account from wallet")
     return accounts.add(config["wallets"]["from_key"])
 
-def deploy_mocks():
+def deploy_mocks(decimals=DECIMALS,initial_value=INITIAL_VALUE):
     print(f"The active network is { network.show_active() }")
     print("Deploying mocks ... ")
     account =getAccount()
-    MockV3Aggregator.deploy(
-        DECIMALS,INITIAL_VALUE,{"from":account}
-    )
+    MockV3Aggregator.deploy(decimals,initial_value,{"from":account})
+    LinkToken.deploy({"from":account})
+    VRFCoordinatorMock.deploy(LinkToken.address,{"from":account})
     print("Mocks Deployed!")
   
 
 contract_to_mock = {
     "eth_usd_price_feed":MockV3Aggregator,
-    "vrf_coordinator": VRFCoordinatorMock}
+    "vrf_coordinator": VRFCoordinatorMock,
+    "link_token":LinkToken}
 def getContract(contract_name):
     """
     This funtion will grab the contract addresses from the brownie config 
