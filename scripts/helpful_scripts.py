@@ -1,5 +1,14 @@
 #from os import fork
-from brownie import accounts, network , config, MockV3Aggregator,Contract,VRFCoordinatorMock,LinkToken
+from brownie import (
+    accounts,
+    network,
+    config,
+    MockV3Aggregator,
+    VRFCoordinatorMock,
+    LinkToken,
+    Contract,
+    interface,
+)
 from web3 import Web3
 
 DECIMALS = 8
@@ -7,6 +16,7 @@ STARTING_PRICE = 200000000000
 INITIAL_VALUE =  200000000000
 LOCAL_BLOCKCHAIN_ENVIRONMENTS =["development","ganache-local"]
 FORKED_LOCAL_ENVIRONMENTS = ["mainnet-dev-fork,mainnet-fork"]
+
 def getAccount(index=None, id=None):
     #accounts[0]
     #accounts.add("env")
@@ -29,10 +39,10 @@ def deploy_mocks(decimals=DECIMALS,initial_value=INITIAL_VALUE):
     print("Deploying mocks ... ")
     account =getAccount()
     MockV3Aggregator.deploy(decimals,initial_value,{"from":account})
-    LinkToken.deploy({"from":account})
-    VRFCoordinatorMock.deploy(LinkToken.address,{"from":account})
-    print("Mocks Deployed!")
-  
+    link_token = LinkToken.deploy({"from": account})
+    VRFCoordinatorMock.deploy(link_token.address, {"from": account})
+    print("Mock Deployed!")
+
 
 contract_to_mock = {
     "eth_usd_price_feed":MockV3Aggregator,
